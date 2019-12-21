@@ -39,7 +39,7 @@ def main():
  
     piplin = Pipeline(*DEFAULT_PIPELINE)
     piplin
-    Korpus = Corpus(tg.file_gen(), piplin)
+    Korpus = Corpus(tg.dir_gen(), piplin)
     
 
     n_topics = 5
