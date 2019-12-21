@@ -15,7 +15,11 @@ def get_abstracts_data(data_filepath, n_data=None):
 			abstracts[i] = abstracts[i].replace(',','')
 	return abstracts
 
-def map_words_to_inds(wordlist):
+def map_words_to_inds(data_list):
+	wordlist = []
+	for item in data_list:
+		words = item.split(' ')
+		wordlist += words
 	word_set = set(wordlist)
 	word_to_ind = dict()
 	ind_to_word = dict()
@@ -23,6 +27,17 @@ def map_words_to_inds(wordlist):
 		word_to_ind[word] = i
 		ind_to_word[i] = word
 	return word_to_ind, ind_to_word
+
+def wordlist_to_abstracts(wordlist): 
+	ret_data_list = []
+	line = ''
+	for word in wordlist:
+		if word == '*':
+			ret_data_list.append(line.strip())
+			line = ''
+		else:
+			line += word + ' '
+	return ret_data_list 
 
 def remove_less_frequent_words(data_list, min_freq=2):
 	wordlist = []
@@ -43,14 +58,7 @@ def remove_less_frequent_words(data_list, min_freq=2):
 		if freq < min_freq:
 			wordlist.pop(i)
 	print('words remoced')
-	ret_data_list = []
-	line = ''
-	for word in wordlist:
-		if word == '*':
-			ret_data_list.append(line.strip())
-			line = ''
-		else:
-			line += word + ' '
+	ret_data_list = wordlist_to_abstracts(wordlist)
 	return ret_data_list
 
 #create function to remove stop word_set
@@ -64,21 +72,29 @@ def rem_stop_words(list_of_abstracts):
 		for word in word_tokens:
 			if word not in stop_words:
 				filtered_sentence.append(word)
-	return filtered_sentence
+		filtered_sentence.append('*')
+	ret_data_list = wordlist_to_abstracts(filtered_sentence)
+	return ret_data_list
 
-
-	pass
-
-if __name__ == '__main__':
-	N_DATA = 20000
+def create_csv_data(n_data=20000): 
 
 	data_filepath = 'WebOfScience/Meta-data/Data.xlsx'
-	abstracts = get_abstracts_data(data_filepath, n_data=N_DATA)
+	abstracts = get_abstracts_data(data_filepath, n_data=n_data)
 
 	abstracts = remove_less_frequent_words(abstracts)
-	wordlist = rem_stop_words(abstracts)
+	abstracts = rem_stop_words(abstracts)
 
-	word_to_ind, ind_to_word = map_words_to_inds(wordlist)
+	csv_file = open('preprocessed_abstracts_data.csv', 'w')
+	for i, abstract in enumerate(abstracts): 
+		line = str(i) + ',' + abstract + '\n'
+		csv_file.write(line)
+	csv_file.close()
+	return abstracts
+
+if __name__ == '__main__':
+	
+	abstracts = create_csv_data(20000)
+	word_to_ind, ind_to_word = map_words_to_inds(abstracts)
 	print(len(word_to_ind))
 	print(len(ind_to_word))
 
