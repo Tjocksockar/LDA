@@ -1,6 +1,7 @@
 import pandas as pd
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+import numpy as np
 
 def get_abstracts_data(data_filepath, n_data=None):
 	data_df = pd.read_excel(data_filepath)
@@ -91,13 +92,26 @@ def create_csv_data(n_data=20000):
 	csv_file.close()
 	return abstracts
 
-if __name__ == '__main__':
-	
-	abstracts = create_csv_data(20000)
-	word_to_ind, ind_to_word = map_words_to_inds(abstracts)
-	print(len(word_to_ind))
-	print(len(ind_to_word))
+def onehot_encoder(): 
+	data_filepath = 'preprocessed_abstracts_data.csv'
+	abstracts_df = pd.read_csv(data_filepath)
+	abstracts_df.columns = ['idx', 'abstracts']
+	abstracts_df = abstracts_df['abstracts']
+	abstracts = abstracts_df.tolist()
 
-	for i in range(10):
-		print()
-		print(abstracts[i])
+	word_to_ind, ind_to_word = map_words_to_inds(abstracts)
+	onehots = []
+	for abstract in abstracts: 
+		abs_words = abstract.split(' ')
+		rows = len(word_to_ind)
+		cols = len(abs_words)
+		onehot = np.zeros((rows, cols))
+		for i, word in enumerate(abs_words): 
+			ind = word_to_ind[word]
+			onehot[ind, i] = 1
+		onehots.append(onehot)
+	return onehots
+	
+if __name__ == '__main__':
+	onehots = onehot_encoder()
+	
