@@ -17,24 +17,28 @@ def VI(alpha, beta, data, k = 10):
     
     conv = 0.0001
     #phi_new = 1/k*np.ones([M, N, k])
-    gamma_new = gamma_0
+    gamma_new = 1000000*gamma_0
     phi = []
 
     #data[M][V][N_m], M dokument, V vokabulärstorlek, N_m antal ord i dokument m
     
     #beta dim = k*V, beta sannolikheten för ord V givet topic k
     #alpha parametrarna i dirichletfördelningen
+    ORD = []
     
+    for m in range(M):
+        indx = np.argwhere(data[m] == np.amax(data[m]))
+        ord = sorted(indx, key = itemgetter(1))
+        ORD.append(ord)
+            
 
-    for _ in range(10):
+    while np.abs(np.sum(gamma_new-gamma_0))>1:
         for m in range(M):
-            indx = np.argwhere(data[m] == np.amax(data[m]))
-            ord = sorted(indx, key = itemgetter(1))
             phi_new = np.zeros([len(data[m][0]), k])
             
             for n in range(len(data[m][0])):
                 for i in range(k):
-                    phi_new[n, i] = beta[i, ord[n][0]]*np.exp(digamma(gamma_0[m, i]))
+                    phi_new[n, i] = beta[i, ORD[m][n][0]]*np.exp(digamma(gamma_0[m, i]))
                 phi_new[n,:] = phi_new[n, :]/min(phi_new[n, :])
                 phi_new[n,:] = phi_new[n, :]/sum(phi_new[n, :])
         
