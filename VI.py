@@ -16,13 +16,12 @@ def VI(alpha, beta, data, k = 10):
                 gamma_0[m, i] = alpha[i] + len(data[m][0])/k
     
     conv = 0.0001
-    #phi_new = 1/k*np.ones([M, N, k])
-    gamma_new = 1000000*gamma_0
+    #phi = 1/k*np.ones([M, N, k])
+    gamma_new = 2*gamma_0
     phi = []
+    #phi_new är unikt för varje dokument, phi ska fyllas med phi_new
 
-    #data[M][V][N_m], M dokument, V vokabulärstorlek, N_m antal ord i dokument m
-    
-    #beta dim = k*V, beta sannolikheten för ord V givet topic k
+    #beta dim = k*V, beta sannolikheten för ord V givet topic k?
     #alpha parametrarna i dirichletfördelningen
     ORD = []
     
@@ -30,9 +29,12 @@ def VI(alpha, beta, data, k = 10):
         indx = np.argwhere(data[m] == np.amax(data[m]))
         ord = sorted(indx, key = itemgetter(1))
         ORD.append(ord)
-            
 
-    while np.abs(np.sum(gamma_new-gamma_0))>1:
+    #ORD[m][n][0] index för ord n i dokument m
+            
+    while LA.norm(gamma_new-gamma_0)> 0:
+        gamma_0 = gamma_new
+        #print("ett varv till!")
         for m in range(M):
             phi_new = np.zeros([len(data[m][0]), k])
             
@@ -44,14 +46,15 @@ def VI(alpha, beta, data, k = 10):
         
             gamma_new[m, :] = alpha + np.sum(phi_new, axis = 0)
             phi.append(phi_new)
-            gamma_0 = gamma_new
+  
+            
         
 
     return phi, gamma_new
 
 if __name__ == '__main__':
 
-    data = onehot_encoder('preprocessed_abstracts_data.csv')
+    data = onehot_encoder()
 
     number_of_topics = 10
     voc_size = len(data[0])
@@ -61,4 +64,4 @@ if __name__ == '__main__':
     beta = np.ones([number_of_topics, voc_size])/voc_size
 
     testVI = VI(alpha, beta, data, number_of_topics)
-    print(testVI)
+    #print(testVI)
