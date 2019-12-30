@@ -77,7 +77,7 @@ def rem_stop_words(list_of_abstracts):
 	ret_data_list = wordlist_to_abstracts(filtered_sentence)
 	return ret_data_list
 
-def create_csv_data(n_data=20000): 
+def create_csv_data(n_data=10):
 
 	data_filepath = 'WebOfScience/Meta-data/Data.xlsx'
 	abstracts = get_abstracts_data(data_filepath, n_data=n_data)
@@ -85,7 +85,7 @@ def create_csv_data(n_data=20000):
 	abstracts = remove_less_frequent_words(abstracts)
 	abstracts = rem_stop_words(abstracts)
 
-	csv_file = open('preprocessed_abstracts_data.csv', 'w')
+	csv_file = open('preprocessed_abstracts_data_test.csv', 'w')
 	for i, abstract in enumerate(abstracts): 
 		line = str(i) + ',' + abstract + '\n'
 		csv_file.write(line)
@@ -93,7 +93,7 @@ def create_csv_data(n_data=20000):
 	return abstracts
 
 def onehot_encoder(): 
-	data_filepath = 'preprocessed_abstracts_data.csv'
+	data_filepath = 'preprocessed_abstracts_data_test.csv'
 	abstracts_df = pd.read_csv(data_filepath)
 	abstracts_df.columns = ['idx', 'abstracts']
 	abstracts_df = abstracts_df['abstracts']
