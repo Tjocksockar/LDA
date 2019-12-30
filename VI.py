@@ -27,8 +27,8 @@ def VI(alpha, beta, data, k = 10):
     
     for m in range(M):
         indx = np.argwhere(data[m] == np.amax(data[m]))
-        ord = sorted(indx, key = itemgetter(1))
-        ORD.append(ord)
+        word = sorted(indx, key = itemgetter(1))
+        ORD.append(word)
 
     #ORD[m][n][0] index för ord n i dokument m
             
