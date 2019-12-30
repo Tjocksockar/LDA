@@ -24,14 +24,14 @@ def VI(alpha, beta, data, k=10):
 
     # beta dim = k*V, beta sannolikheten för ord V givet topic k?
     # alpha parametrarna i dirichletfördelningen
-    ORD = []
+    WORD = []
 
     for m in range(M):
         indx = np.argwhere(data[m] == np.amax(data[m]))
         word = sorted(indx, key=itemgetter(1))
-        ORD.append(word)
+        WORD.append(word)
 
-    # ORD[m][n][0] index för ord n i dokument m
+    # WORD[m][n][0] index för ord n i dokument m
 
     while LA.norm(gamma_new - gamma_0) > 1e-3:
         print(LA.norm(gamma_new - gamma_0))
@@ -43,7 +43,7 @@ def VI(alpha, beta, data, k=10):
 
             for n in range(len(data[m][0])):
                 for i in range(k):
-                    phi_new[n, i] = beta[i, ORD[m][n][0]] * np.exp(digamma(gamma_0[m, i]))
+                    phi_new[n, i] = beta[i, WORD[m][n][0]] * np.exp(digamma(gamma_0[m, i]))
                 phi_new[n, :] = phi_new[n, :] / np.sum(phi_new[n, :])
 
             gamma_new[m, :] = alpha + np.sum(phi_new, axis=0)
