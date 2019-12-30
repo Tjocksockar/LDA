@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.special as sci
-
+import time
 
 from read_data import *
 from VI import *
@@ -15,15 +15,15 @@ def em(K, V, data):
         print('Start EM iterations...')
         counter = 0
         while diff_alpha > conv and diff_beta > conv:
-                #phi, gamma = VI(alpha, beta, data, K)
+                phi, gamma = VI(alpha, beta, data, K)
 
                 ##### JUST FOR TESTING - COMMENT OUT WHEN RUNNING
-                phi = []
-                M = len(data)
-                for d in range(M):
-                    N = data[d].shape[1]
-                    phi.append(np.ones((N,K)))
-                gamma = np.ones((M,K))
+                #phi = []
+                #M = len(data)
+                #for d in range(M):
+                #    N = data[d].shape[1]
+                #    phi.append(np.ones((N,K)))
+                #gamma = np.ones((M,K))
                 ##### END TEST CODE
 
                 print('Completed VI round ' + str(counter))
@@ -32,17 +32,21 @@ def em(K, V, data):
                 M = len(data)
                 beta_new = np.zeros((K,V))
                 for i in range(K):
-                        for j in range(V):
-                                for d in range(M):
-                                        N = data[d].shape[1]
-                                        for n in range(N):
-                                                beta_new[i,j] += phi[d][n,i] * data[d][j,n]
+                        for d in range(M):
+                                data_matrix = data[d]
+                                one_inds = np.nonzero(data_matrix)
+                                n_ones = one_inds[0].shape[0]
+                                for l in range(n_ones):
+                                        ind_j = one_inds[0][l]
+                                        ind_n = one_inds[1][l]
+                                        beta_new[i,ind_j] += phi[d][ind_n,i] * data[d][ind_j,ind_n]
                         alpha_new = alpha - np.matmul(np.linalg.inv(hessian(alpha, M)), gradient(alpha, M, gamma))
                 diff_alpha = np.linalg.norm(alpha_new-alpha)
                 diff_beta = np.linalg.norm(beta_new-beta)
                 alpha = alpha_new
                 beta = beta_new
                 print('Completed EM round ' + str(counter-1))
+                print(alpha)
 
         return alpha, beta
 
@@ -69,7 +73,7 @@ def hessian(alpha, M):
 if __name__ == '__main__':
         K = 10 # number of topics i.e parameters
         data = onehot_encoder()
-        data = data[0:10]
+        data = data[0:30]
         V = data[0].shape[0] # vocabulary size
 
         alpha, beta = em(K, V, data)

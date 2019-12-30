@@ -93,7 +93,7 @@ def create_csv_data(n_data=10):
 	return abstracts
 
 def onehot_encoder(): 
-	data_filepath = 'preprocessed_abstracts_data_test.csv'
+	data_filepath = 'preprocessed_abstracts_data.csv'
 	abstracts_df = pd.read_csv(data_filepath)
 	abstracts_df.columns = ['idx', 'abstracts']
 	abstracts_df = abstracts_df['abstracts']
