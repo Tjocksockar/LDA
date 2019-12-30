@@ -33,7 +33,7 @@ def VI(alpha, beta, data, k = 10):
     #ORD[m][n][0] index för ord n i dokument m
             
     while LA.norm(gamma_new-gamma_0)> 0:
-        gamma_0 = gamma_new
+        gamma_0 = gamma_new.copy()
         #print("ett varv till!")
         for m in range(M):
             phi_new = np.zeros([len(data[m][0]), k])
