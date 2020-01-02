@@ -42,8 +42,7 @@ def VI(alpha, beta, data, k=10):
             phi_new = np.ones([len(data[m][0]), k])/k
 
             for n in range(len(data[m][0])):
-                for i in range(k):
-                    phi_new[n, i] = beta[i, WORD[m][n][0]] * np.exp(digamma(gamma_0[m, i])-digamma(np.sum(gamma_0[m,:])))
+                phi_new[n, :] = beta[:, WORD[m][n][0]] * np.exp(digamma(gamma_0[m, :])-digamma(np.sum(gamma_0[m,:])))
                 phi_new[n, :] = phi_new[n, :] / np.sum(phi_new[n, :])
         
 
@@ -64,7 +63,7 @@ if __name__ == '__main__':
     beta = np.ones([number_of_topics, voc_size])
 
     for k in range(number_of_topics):
-        beta[k, :] = np.random.dirichlet(np.ones(voc_size)/voc_size)
+        beta[k, :] = np.random.dirichlet(np.ones(voc_size))
         for i in range (voc_size):
             if beta[k,i] == 0:
                 beta[k, i] = 0.00000000001
