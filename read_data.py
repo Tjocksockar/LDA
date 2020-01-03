@@ -29,7 +29,7 @@ def map_words_to_inds(data_list):
 		ind_to_word[i] = word
 	return word_to_ind, ind_to_word
 
-def wordlist_to_abstracts(wordlist): 
+def wordlist_to_abstracts(wordlist):
 	ret_data_list = []
 	line = ''
 	for word in wordlist:
@@ -38,7 +38,7 @@ def wordlist_to_abstracts(wordlist):
 			line = ''
 		else:
 			line += word + ' '
-	return ret_data_list 
+	return ret_data_list
 
 def remove_less_frequent_words(data_list, min_freq=2):
 	wordlist = []
@@ -86,14 +86,15 @@ def create_csv_data(n_data=10):
 	abstracts = rem_stop_words(abstracts)
 
 	csv_file = open('preprocessed_abstracts_data_test.csv', 'w')
-	for i, abstract in enumerate(abstracts): 
+	for i, abstract in enumerate(abstracts):
 		line = str(i) + ',' + abstract + '\n'
 		csv_file.write(line)
 	csv_file.close()
 	return abstracts
 
-def onehot_encoder(): 
-	data_filepath = 'preprocessed_abstracts_data.csv'
+def onehot_encoder():
+	#data_filepath = 'preprocessed_abstracts_data.csv'
+	data_filepath = '200preprocessed_abstracts_data.csv'
 	abstracts_df = pd.read_csv(data_filepath)
 	abstracts_df.columns = ['idx', 'abstracts']
 	abstracts_df = abstracts_df['abstracts']
@@ -101,17 +102,16 @@ def onehot_encoder():
 
 	word_to_ind, ind_to_word = map_words_to_inds(abstracts)
 	onehots = []
-	for abstract in abstracts: 
+	for abstract in abstracts:
 		abs_words = abstract.split(' ')
 		rows = len(word_to_ind)
 		cols = len(abs_words)
 		onehot = np.zeros((rows, cols))
-		for i, word in enumerate(abs_words): 
+		for i, word in enumerate(abs_words):
 			ind = word_to_ind[word]
 			onehot[ind, i] = 1
 		onehots.append(onehot)
 	return onehots
-	
+
 if __name__ == '__main__':
 	onehots = onehot_encoder()
-	

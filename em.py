@@ -6,8 +6,11 @@ from read_data import *
 from VI import *
 
 def em(K, V, data):
-        alpha = np.ones(K)/K
-        beta = np.ones((K, V))/V
+        alpha = np.ones(K)
+        beta = np.empty((K,V))
+        for k in range(K):
+            beta[k, :] = np.random.dirichlet(np.ones(V))
+            #beta[k, :] = beta[k, :] / np.sum(beta[k, :])
 
         conv = 0.0001
         diff_alpha = conv + 1
@@ -40,6 +43,7 @@ def em(K, V, data):
                                         ind_j = one_inds[0][l]
                                         ind_n = one_inds[1][l]
                                         beta_new[i,ind_j] += phi[d][ind_n,i] * data[d][ind_j,ind_n]
+                        #beta_new[i,:] = beta_new[i,:] / np.sum(beta_new[i,:])
                         alpha_new = alpha - np.matmul(np.linalg.inv(hessian(alpha, M)), gradient(alpha, M, gamma))
                 diff_alpha = np.linalg.norm(alpha_new-alpha)
                 diff_beta = np.linalg.norm(beta_new-beta)
@@ -47,7 +51,10 @@ def em(K, V, data):
                 beta = beta_new
                 print('Completed EM round ' + str(counter-1))
                 print(alpha)
-
+                print('='*50)
+                print(beta)
+                print('='*50)
+                print(alpha)
         return alpha, beta
 
 def gradient(alpha, M, gamma):
@@ -73,7 +80,7 @@ def hessian(alpha, M):
 if __name__ == '__main__':
         K = 10 # number of topics i.e parameters
         data = onehot_encoder()
-        data = data[0:30]
+        #data = data[0:30]
         V = data[0].shape[0] # vocabulary size
 
         alpha, beta = em(K, V, data)
