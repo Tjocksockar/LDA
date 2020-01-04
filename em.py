@@ -10,7 +10,7 @@ def em(K, V, data):
         beta = np.empty((K,V))
         for k in range(K):
             beta[k, :] = np.random.dirichlet(np.ones(V))
-            #beta[k, :] = beta[k, :] / np.sum(beta[k, :])
+            beta[k, :] = beta[k, :] / np.sum(beta[k, :])
 
         conv = 0.0001
         diff_alpha = conv + 1
@@ -43,7 +43,7 @@ def em(K, V, data):
                                         ind_j = one_inds[0][l]
                                         ind_n = one_inds[1][l]
                                         beta_new[i,ind_j] += phi[d][ind_n,i] * data[d][ind_j,ind_n]
-                        #beta_new[i,:] = beta_new[i,:] / np.sum(beta_new[i,:])
+                        beta_new[i,:] = beta_new[i,:] / np.sum(beta_new[i,:])
                         alpha_new = alpha - np.matmul(np.linalg.inv(hessian(alpha, M)), gradient(alpha, M, gamma))
                 diff_alpha = np.linalg.norm(alpha_new-alpha)
                 diff_beta = np.linalg.norm(beta_new-beta)
@@ -76,6 +76,16 @@ def hessian(alpha, M):
                                 delta = 0
                         hessian_alpha[i, j] = M * (sci.polygamma(1, np.sum(alpha)) - delta*sci.polygamma(1,alpha[i]))
         return hessian_alpha
+
+def generate_document(alpha, beta,K, N=20):
+    theta = np.random.dirichlet(alpha, K)
+    theta = theta / np.sum(theta)
+    document = np.empty(N)
+    for n in range(N):
+        topic = np.random.multinomial(1000, theta, size=1) # First arg how many times experiment runs before returning probs
+        word = np.random.multinomial(1000, beta[topic, :])
+        document[n] = word
+    return document
 
 if __name__ == '__main__':
         K = 10 # number of topics i.e parameters
