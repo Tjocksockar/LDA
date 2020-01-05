@@ -2,10 +2,12 @@ from plsa import *
 from plsa.pipeline import DEFAULT_PIPELINE
 from plsa.algorithms import PLSA
 import plsa.preprocessors as pre 
+from plsa.algorithms.result import *
 import codecs
 import argparse
 import os
 import pdb
+import numpy as np
 
  
 
@@ -23,7 +25,13 @@ class TG(object):
             korp = korp.read().lower()
             yield korp
     
-
+    def file_gen(self):    
+        fname = self.data
+        f = open(fname, encoding='utf8', errors='ignore')
+        f = f.read()
+        abstracts = f.split("\n")
+        for abstract in abstracts: 
+            yield abstract
 
 
 
@@ -33,37 +41,50 @@ def main():
     
     arguments = parser.parse_args()
     
-    data = arguments.file
+    csv_file = arguments.file
 
-    tg = TG(data)
+    #tg = TG(data)
+    #testset = TG('')
  
     piplin = Pipeline(*DEFAULT_PIPELINE)
     piplin
-    Korpus = Corpus(tg.dir_gen(), piplin)
-    
+    Korpus = Corpus.from_csv(csv_file, piplin)
 
     n_topics = 5
-    plsa = PLSA(Korpus, n_topics, True)
+    plsa = PLSA(Korpus, n_topics, True)   
+
+    
+    #pdb.set_trace()
     result = plsa.fit()
     plsa
 
     result.topic
-    new_doc = "This is a new document I would like to get a topic for"
-    topic_components, number_of_new_words, new_words = result.predict(new_doc)
     
-    print()
-    print('Relative topic importance in new document:', topic_components)
-    print('Number of previously unseen words in new document:', number_of_new_words)
-    print('Previously unseen words in new document:', new_words)
+    eta = 0.00000001
+    num_words = 0
+    docprobs = [] #the document logprobability
+    testdocs = [['test', 'text', 'special', 'words', 'scientific', 'patients'], ['and' 'heres' 'another' 'with' 'some' 'more' 'words' 'medical']] #some text? the testset
 
-    new_doc = "This is a document som borde ha fler osedda ord but maybe some has been seen"
-    topic_components, number_of_new_words, new_words = result.predict(new_doc)
-    
-    print('Relative topic importance in new document:', topic_components)
-    print('Number of previously unseen words in new document:', number_of_new_words)
-    print('Previously unseen words in new document:', new_words)
+    for doc in testdocs:
+        PW = 0        
+        t = result.predict(doc)
 
-    
+        t_w = result.topic_given_doc
+        t_w = t_w[windex]
+        for word in doc:
+            windex = Korpus.index[word]
+            pdb.set_trace()
+            for topic in range(n_topics):
+                w_t = result.word_given_topic #topics*voc_size*2??
+                w_t = w_t[n][windex][1]
+            PW = np.log(w_t*t/(t_w+eta)+eta)+PW
+                
+            num_words += 1
+        docprobs.append(PW)
+
+    perplexity = np.exp(np.sum(docprobs)/num_words)
+    print("Perplexity", perplexity)
+ 
 
 if __name__ == "__main__":
     main()
