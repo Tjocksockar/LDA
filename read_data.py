@@ -8,12 +8,12 @@ def get_abstracts_data(data_filepath, n_data=None):
 	abstracts_df = data_df['Abstract']
 	if n_data != None:
 		abstracts_df = abstracts_df.sample(n=n_data)
-		abstracts = abstracts_df.tolist()
-		for i in range(len(abstracts)):
-			abstracts[i].lower()
-			abstracts[i] = abstracts[i].strip()
-			abstracts[i] = abstracts[i].replace('.','')
-			abstracts[i] = abstracts[i].replace(',','')
+	abstracts = abstracts_df.tolist()
+	for i in range(len(abstracts)):
+		abstracts[i] = abstracts[i].lower()
+		abstracts[i] = abstracts[i].strip()
+		abstracts[i] = abstracts[i].replace('.','')
+		abstracts[i] = abstracts[i].replace(',','')
 	return abstracts
 
 def map_words_to_inds(data_list):
@@ -69,7 +69,8 @@ def rem_stop_words(list_of_abstracts):
 
 	for abstract in list_of_abstracts:
 
-		word_tokens = word_tokenize(abstract)
+		#word_tokens = word_tokenize(abstract)
+		word_tokens = abstract.split(' ')
 		for word in word_tokens:
 			if word not in stop_words:
 				filtered_sentence.append(word)
@@ -85,16 +86,15 @@ def create_csv_data(n_data=10):
 	abstracts = remove_less_frequent_words(abstracts)
 	abstracts = rem_stop_words(abstracts)
 
-	csv_file = open('preprocessed_abstracts_data_test.csv', 'w')
+	csv_file = open(str(n_data)+'preprocessed_abstracts_data_test.csv', 'w')
 	for i, abstract in enumerate(abstracts):
 		line = str(i) + ',' + abstract + '\n'
 		csv_file.write(line)
 	csv_file.close()
 	return abstracts
 
-def onehot_encoder():
+def onehot_encoder(data_filepath):
 	#data_filepath = 'preprocessed_abstracts_data.csv'
-	data_filepath = '200preprocessed_abstracts_data.csv'
 	abstracts_df = pd.read_csv(data_filepath)
 	abstracts_df.columns = ['idx', 'abstracts']
 	abstracts_df = abstracts_df['abstracts']
@@ -111,7 +111,8 @@ def onehot_encoder():
 			ind = word_to_ind[word]
 			onehot[ind, i] = 1
 		onehots.append(onehot)
-	return onehots
+	return onehots, word_to_ind, ind_to_word
 
 if __name__ == '__main__':
-	onehots = onehot_encoder()
+	create_csv_data(2000)
+	#onehots = onehot_encoder()

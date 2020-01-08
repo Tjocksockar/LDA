@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.special as sci
 import time
+import sys
 
 from read_data import *
 from VI import *
@@ -42,7 +43,7 @@ def em(K, V, data):
                                 for l in range(n_ones):
                                         ind_j = one_inds[0][l]
                                         ind_n = one_inds[1][l]
-                                        beta_new[i,ind_j] += phi[d][ind_n,i] * data[d][ind_j,ind_n]
+                                        beta_new[i,ind_j] += phi[d][ind_n,i] * data[d][ind_j,ind_n] + sys.float_info.epsilon
                         beta_new[i,:] = beta_new[i,:] / np.sum(beta_new[i,:])
                         alpha_new = alpha - np.matmul(np.linalg.inv(hessian(alpha, M)), gradient(alpha, M, gamma))
                 diff_alpha = np.linalg.norm(alpha_new-alpha)
@@ -50,11 +51,11 @@ def em(K, V, data):
                 alpha = alpha_new
                 beta = beta_new
                 print('Completed EM round ' + str(counter-1))
-                print(alpha)
-                print('='*50)
-                print(beta)
-                print('='*50)
-                print(alpha)
+                #print(alpha)
+                #print('='*50)
+                #print(beta)
+                #print('='*50)
+                #print(alpha)
         return alpha, beta
 
 def gradient(alpha, M, gamma):
@@ -82,15 +83,54 @@ def generate_document(alpha, beta,K, N=20):
     theta = theta / np.sum(theta)
     document = np.empty(N)
     for n in range(N):
-        topic = np.random.multinomial(1000, theta, size=1) # First arg how many times experiment runs before returning probs
-        word = np.random.multinomial(1000, beta[topic, :])
+        topic = np.random.multinomial(1, theta, size=1) # First arg how many times experiment runs before returning probs
+        topic = np.argmax(topic)
+        word = np.random.multinomial(1, beta[topic, :], size=1)
+        word = np.argmax(word)
         document[n] = word
     return document
 
+def generate_text(document, ind_to_word):
+    wordlist = []
+    N = document.shape[0]
+    for n in range(N):
+        text = ind_to_word[document[n]]
+        wordlist.append(text)
+    return wordlist
+
+def get_topwords_for_topic(topic_list, beta, ind_to_word, V, n_first=15):
+    top_wordlist = []
+    for topic in topic_list:
+        word_rank = np.argsort(beta[topic,:])
+        word_top = word_rank[V-n_first:V]
+        word_top = np.flip(word_top)
+        text = []
+        for i in range(n_first):
+            text.append(ind_to_word[word_top[i]])
+        top_wordlist.append(text)
+    return top_wordlist
+
 if __name__ == '__main__':
-        K = 10 # number of topics i.e parameters
-        data = onehot_encoder()
+        K = 5 # number of topics i.e parameters
+        data, word_to_ind, ind_to_word = onehot_encoder('2000preprocessed_abstracts_data_test.csv')
         #data = data[0:30]
         V = data[0].shape[0] # vocabulary size
 
         alpha, beta = em(K, V, data)
+        print('Alpha is')
+        print(alpha)
+        print('Beta is')
+        print(beta)
+        print('='*50)
+        document = generate_document(alpha, beta, K)
+        wordlist = generate_text(document, ind_to_word)
+        #print(wordlist)
+
+        topic_list = []
+        for k in range(K):
+            topic_list.append(k)
+        word_toplist = get_topwords_for_topic(topic_list, beta, ind_to_word, V)
+        for j in range(len(topic_list)):
+            print('For topic ' + str(topic_list[j]))
+            print(word_toplist[j])
+            print('='*50)
