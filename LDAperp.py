@@ -37,20 +37,24 @@ def lower_bound(g, phi, alfa, beta, doc, voc_size, num_topics):
 def perplexity(g, phi, alfa, beta, data, voc_size, num_topics):
     #data typ WORD[doc][docplats] = voc_index 
     # inte 'ettord' utan typ 1938, voc_index
+    logarray=[]
     logp = 0
     num_words = 0
     for index in range(len(data)):
         logp += logp
         logp = lower_bound(g[index], phi[index], alfa, beta, data[index], voc_size, num_topics)
-        num_words += len(data[index])
 
-    perp = np.exp(-np.sum(logp)/num_words)
+        if logp>-1000000000000000000:
+            logarray.append(logp)
+            num_words += len(data[index])
+
+    perp = np.exp(-np.sum(logarray)/num_words)
     #perp=np.sum(perp)
     return perp
 
 def main():
-    one_hot, word_to_ind, ind_to_word = onehot_encoder('200preprocessed_abstracts_data_test.csv')
-    num_topics = 3
+    one_hot, word_to_ind, ind_to_word = onehot_encoder('2000preprocessed_abstracts_data.csv')
+    num_topics =7
     voc_size = one_hot[0].shape[0]
     M = len(one_hot)
 
