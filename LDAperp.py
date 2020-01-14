@@ -91,7 +91,7 @@ def main():
     csv_file_phi = open(str(num_topics) + 'topics_phi.csv', 'w')
     for m in range(len(train)):
         #savetxt(csv_file_phi, phi[m], delimiter=',')
-        pd.DataFrame(phi).to_csv(csv_file_phi)
+        pd.DataFrame(phi[m]).to_csv(csv_file_phi)
     csv_file_phi.close()
 
     #print("Perplexity", perplx)
