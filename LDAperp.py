@@ -7,6 +7,7 @@ import pdb
 from operator import itemgetter
 from em import em
 from VI import VI
+import pandas as pd
 
 #log p(w|alfa, beta) = L(g, phi, alfa, beta) + KLD
 
@@ -73,20 +74,24 @@ def main():
 
     #perplx = perplexity(gamma, phi, alpha, beta, testdata, voc_size, num_topics)
     csv_file_alpha = open(str(num_topics) + 'topics_alpha.csv', 'w')
-    savetxt(csv_file_alpha,alpha, delimiter=',')
+    #savetxt(csv_file_alpha,alpha, delimiter=',')
+    pd.DataFrame(alpha).to_csv(csv_file_alpha)
     csv_file_alpha.close()
 
     csv_file_beta = open(str(num_topics) + 'topics_beta.csv', 'w')
-    savetxt(csv_file_beta, beta, delimiter=',')
+    #savetxt(csv_file_beta, beta, delimiter=',')
+    pd.DataFrame(beta).to_csv(csv_file_beta)
     csv_file_beta.close()
 
     csv_file_gamma = open(str(num_topics) + 'topics_gamma.csv', 'w')
-    savetxt(csv_file_gamma, gamma, delimiter=',')
+    #savetxt(csv_file_gamma, gamma, delimiter=',')
+    pd.DataFrame(gamma).to_csv(csv_file_gamma)
     csv_file_gamma.close()
 
     csv_file_phi = open(str(num_topics) + 'topics_phi.csv', 'w')
     for m in range(len(train)):
-        savetxt(csv_file_phi, phi[m], delimiter=',')
+        #savetxt(csv_file_phi, phi[m], delimiter=',')
+        pd.DataFrame(phi).to_csv(csv_file_phi)
     csv_file_phi.close()
 
     #print("Perplexity", perplx)
