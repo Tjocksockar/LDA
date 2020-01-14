@@ -37,19 +37,52 @@ def lower_bound(g, phi, alfa, beta, doc, voc_size, num_topics):
     LB = E1 + E2 + E3 + E4 - E5
     return LB
 
-def perplexity(g, phi, alfa, beta, data, voc_size, num_topics):
+def MCprob(alfa, beta, doc, K):
+    
+    vol = 1/np.math.factorial(K)
+    sampling = 100 #number of samples for monte carlo 
+    MC = []
+    C = gamma(np.sum(alfa))/np.prod(gamma(alfa))
+
+    for _ in range(sampling):
+        docprob = 1
+        theta = np.random.dirichlet(alfa)
+
+        for word in doc:
+            logdocprob = 0
+            wordprob = 0
+            topicprobs = np.random.multinomial(1, theta)
+            #for i in range(K):
+            topic = np.nonzero(topicprobs)
+            wordprob = beta[topic, word[0]]*theta[topic]
+                #print(wordprob)
+            #print("beta", beta[topic, word[0]])
+            #print("Docprob", docprob)
+            logdocprob = logdocprob + np.log(wordprob)
+
+        #pdb.set_trace()
+        MC.append(theta*np.exp(logdocprob)) #det här ska vara p(theta|alfa), inte theta
+
+    MC_prob = vol*np.sum(MC)/sampling
+    #print("MCprob", MC_prob) 
+    return MC_prob 
+
+def perplexity(alfa, beta, data, voc_size, num_topics):
     #data typ WORD[doc][docplats] = voc_index 
     # inte 'ettord' utan typ 1938, voc_index
     logarray=[]
-    logp = 0
+    #logp = 0
     num_words = 0
     for index in range(len(data)):
-        logp += logp
-        logp = lower_bound(g[index], phi[index], alfa, beta, data[index], voc_size, num_topics)
+        
+        #logp = lower_bound(g[index], phi[index], alfa, beta, data[index], voc_size, num_topics)
+        logp = np.log(MCprob(alfa, beta, data[index], num_topics))
+        #logp += logp
+        logarray.append(logp)
 
-        if logp>-1000000000000000000:
-            logarray.append(logp)
-            num_words += len(data[index])
+        num_words += len(data[index])
+    
+    pdb.set_trace()
 
     perp = np.exp(-np.sum(logarray)/num_words)
     #perp=np.sum(perp)
@@ -58,43 +91,30 @@ def perplexity(g, phi, alfa, beta, data, voc_size, num_topics):
 def main():
     data, word_to_ind, ind_to_word = onehot_encoder('2200preprocessed_abstracts_data.csv')
     train=data[0:2000]
-    #est=data[2000:2200]
-    num_topics =15
+    test=data[2000:2100]
+    num_topics = 2
     voc_size = data[0].shape[0]
-    #M = len(test)
+    M = len(test)
 
-    alpha, beta, phi,gamma = em(num_topics, voc_size, train)
+    #alpha, beta, phi,gamma = em(num_topics, voc_size, train)
     
     testdata  = []
-    #for m in range(M):
-       # indx = np.argwhere(test[m] == np.amax(test[m]))
-       # word = sorted(indx, key=itemgetter(1))
-       # testdata.append(word)
+    for m in range(M):
+        indx = np.argwhere(test[m] == np.amax(test[m]))
+        word = sorted(indx, key=itemgetter(1))
+        testdata.append(word)
+
+    alfa = pd.read_csv('2topics_alpha.csv')
+    #pdb.set_trace()
+    beta = pd.read_csv('2topics_beta.csv')
+    beta = beta.to_numpy()
+    #pdb.set_trace()
+
+    alfa = alfa['0'].values.tolist()
 
 
-    #perplx = perplexity(gamma, phi, alpha, beta, testdata, voc_size, num_topics)
-    csv_file_alpha = open(str(num_topics) + 'topics_alpha.csv', 'w')
-    #savetxt(csv_file_alpha,alpha, delimiter=',')
-    pd.DataFrame(alpha).to_csv(csv_file_alpha)
-    csv_file_alpha.close()
-
-    csv_file_beta = open(str(num_topics) + 'topics_beta.csv', 'w')
-    #savetxt(csv_file_beta, beta, delimiter=',')
-    pd.DataFrame(beta).to_csv(csv_file_beta)
-    csv_file_beta.close()
-
-    csv_file_gamma = open(str(num_topics) + 'topics_gamma.csv', 'w')
-    #savetxt(csv_file_gamma, gamma, delimiter=',')
-    pd.DataFrame(gamma).to_csv(csv_file_gamma)
-    csv_file_gamma.close()
-
-    csv_file_phi = open(str(num_topics) + 'topics_phi.csv', 'w')
-    for m in range(len(train)):
-        #savetxt(csv_file_phi, phi[m], delimiter=',')
-        pd.DataFrame(phi[m]).to_csv(csv_file_phi)
-    csv_file_phi.close()
-
-    #print("Perplexity", perplx)
+    perplx = perplexity(alfa, beta, testdata, voc_size, 2)
+    print("Perplexity", perplx)
 
 if __name__ == "__main__":
     main()
