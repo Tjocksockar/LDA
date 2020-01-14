@@ -48,7 +48,7 @@ def em(K, V, data):
         diff_beta = conv + 1
         print('Start EM iterations...')
         counter = 0
-        while diff_alpha > conv and diff_beta > conv:
+        while counter<50:
                 phi, gamma = vi(alpha, beta, data, K)
 
                 ##### JUST FOR TESTING - COMMENT OUT WHEN RUNNING
@@ -73,7 +73,8 @@ def em(K, V, data):
                                 for l in range(n_ones):
                                         ind_j = one_inds[0][l]
                                         ind_n = one_inds[1][l]
-                                        beta_new[i,ind_j] += phi[d][ind_n,i] + sys.float_info.epsilon
+                                        beta_new[i,ind_j] += phi[d][ind_n,i]
+                        beta_new[i,:]=beta_new[i,:]+ sys.float_info.epsilon
                         beta_new[i,:] = beta_new[i,:] / np.sum(beta_new[i,:])
                         alpha_new = alpha - np.matmul(np.linalg.inv(hessian(alpha, M,K)), gradient(alpha, M, gamma,K))
                 diff_alpha = np.linalg.norm(alpha_new-alpha)
